@@ -1,91 +1,4 @@
 <!DOCTYPE html>
-<html lang="es"><body>
-
-  <model-viewer
-    src="Rack_NODO_FINAL_AR_iPhone (3).glb"
-    alt="Rack Sistema NODO en melamina Faplac Kiri"
-    camera-controls
-    shadow-intensity="1"
-    ar
-    ar-modes="webxr scene-viewer quick-look"
-    ar-placement="floor"
-    ar-scale="fixed">
-
-    <button slot="ar-button" class="ar-button">
-      VER EN TU ESPACIO
-    </button>
-
-  </model-viewer>
-
-</body>
-</html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <script type="module"
-    src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js">
-  </script>
-
-  <style>
-    html, body {
-      margin: 0;
-      width: 100%;
-      height: 100%;
-      background: #ffffff;
-      font-family: Arial, sans-serif;
-    }
-
-    model-viewer {
-      width: 100%;
-      height: 100vh;
-      background: #ffffff;
-    }
-
-   .ar-button {
-  position: absolute;
-  top: 30px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: max-content;
-  height: auto;
-  min-width: 0;
-  min-height: 0;
-  padding: 12px 22px;
-  margin: 0;
-  border: 1px solid #222;
-  border-radius: 4px;
-  background: white;
-  color: #222;
-  font-size: 14px;
-  line-height: 1.2;
-  white-space: nowrap;
-  cursor: pointer;
-}
-  </style>
-</head>
-
-<body>
-
-  <model-viewer
-    src="Rack_NODO_FINAL_AR_iPhone (3).glb"
-    alt="Rack Sistema NODO en melamina Faplac Kiri"
-    camera-controls
-    auto-rotate
-    shadow-intensity="1"
-    ar
-    ar-modes="webxr scene-viewer quick-look"
-    ar-placement="floor"
-    ar-scale="fixed">
-
-    <button slot="ar-button" class="ar-button">
-      VER EN TU ESPACIO
-    </button>
-
-  </model-viewer>
-
-</body>
-</html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -100,26 +13,31 @@
       margin: 0;
       width: 100%;
       height: 100%;
-      background: #ffffff;
+      background: #fff;
       font-family: Arial, sans-serif;
     }
 
     model-viewer {
       width: 100%;
       height: 100vh;
-      background: #ffffff;
+      background: #fff;
     }
 
-    .ar-button {
-      background: #ffffff;
-      border: 1px solid #222222;
-      padding: 14px 24px;
-      font-size: 15px;
-      cursor: pointer;
-      position: absolute;
+    #arBtn {
+      position: fixed;
+      top: 25px;
       left: 50%;
-      bottom: 25px;
       transform: translateX(-50%);
+      z-index: 9999;
+      padding: 12px 22px;
+      border: 1px solid #222;
+      border-radius: 5px;
+      background: #fff;
+      color: #222;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -127,23 +45,27 @@
 <body>
 
   <model-viewer
-    src="Rack_Sistema_Kiri_AR_escala_real.glb"
+    id="rack"
+    src="Rack_NODO_FINAL_AR_iPhone (3).glb"
     alt="Rack Sistema NODO en melamina Faplac Kiri"
     camera-controls
-    auto-rotate
     shadow-intensity="1"
     ar
     ar-modes="webxr scene-viewer quick-look"
     ar-placement="floor"
     ar-scale="fixed">
-
-    <button slot="ar-button" class="ar-button">
-      VER EN TU ESPACIO
-    </button>
-
   </model-viewer>
+
+  <button id="arBtn">VER EN TU ESPACIO</button>
+
+  <script>
+    const rack = document.getElementById('rack');
+    const arBtn = document.getElementById('arBtn');
+
+    arBtn.addEventListener('click', () => {
+      rack.activateAR();
+    });
+  </script>
 
 </body>
 </html>
-
- 
