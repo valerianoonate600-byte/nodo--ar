@@ -56,9 +56,17 @@ exposure="0.7"
     ar-scale="fixed">
   </model-viewer>
 
-  <button id="arBtn">VER EN TU ESPACIO</button>
+ <button id="arBtn">VER EN TU ESPACIO</button>
 
-  <script>
+<div id="desktopQr">
+  <p>Escaneá con tu celular para verlo en tu espacio</p>
+  <img
+    src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fvalerianoonate600-byte.github.io%2Fnodo--ar%2F"
+    alt="QR para abrir NODO AR en el celular"
+  >
+</div>
+
+<script>
     const rack = document.getElementById('rack');
     const arBtn = document.getElementById('arBtn');
 
