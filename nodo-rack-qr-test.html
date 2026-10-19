@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <script type="module"
+    src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js">
+  </script>
+
+  <style>
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      background: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    model-viewer {
+      width: 100%;
+      height: 100vh;
+      background-color: #eeeeee;
+    }
+
+    #arBtn {
+      position: fixed;
+      top: 25px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      padding: 12px 22px;
+      border: 1px solid #222;
+      border-radius: 5px;
+      background: #fff;
+      color: #222;
+      font-size: 14px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    #desktopQr {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 9998;
+      width: 220px;
+      padding: 16px;
+      background: rgba(255,255,255,0.96);
+      border: 1px solid #d7d7d7;
+      border-radius: 10px;
+      box-shadow: 0 8px 26px rgba(0,0,0,0.12);
+      text-align: center;
+    }
+
+    #desktopQr p {
+      margin: 0 0 12px 0;
+      font-size: 15px;
+      line-height: 1.35;
+      color: #222;
+      font-weight: 600;
+    }
+
+    #desktopQr img {
+      display: block;
+      width: 180px;
+      height: 180px;
+      margin: 0 auto;
+    }
+
+    #desktopQr small {
+      display: block;
+      margin-top: 9px;
+      font-size: 12px;
+      line-height: 1.3;
+      color: #666;
+    }
+
+    @media (max-width: 768px) {
+      #desktopQr {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <model-viewer
+    id="rack"
+    src="NODO_RACK_KIRI_MDF_V2_AR.glb"
+    camera-controls
+    exposure="0.7"
+    shadow-intensity="1"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    ar-placement="floor"
+    ar-scale="fixed">
+  </model-viewer>
+
+  <button id="arBtn">VER EN TU ESPACIO</button>
+
+  <div id="desktopQr">
+    <p>Escaneá con tu celular para verlo en tu espacio</p>
+    <img
+      src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fvalerianoonate600-byte.github.io%2Fnodo--ar%2Ftest-qr.html"
+      alt="QR para abrir NODO AR en el celular">
+    <small>El QR abre este mismo visor en el teléfono.</small>
+  </div>
+
+  <script>
+    const rack = document.getElementById('rack');
+    const arBtn = document.getElementById('arBtn');
+
+    arBtn.addEventListener('click', () => {
+      rack.activateAR();
+    });
+  </script>
+
+</body>
+</html>
