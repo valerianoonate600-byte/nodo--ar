@@ -7,12 +7,80 @@
 <style>
 html, body { margin:0; width:100%; height:100%; background:#fff; font-family:Arial,sans-serif; }
 model-viewer { width:100%; height:100vh; background-color:#eeeeee; }
-#topControls { position:fixed; top:22px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; align-items:center; gap:10px; }
-#colors { display:flex; gap:8px; padding:7px; background:rgba(255,255,255,.96); border:1px solid #d7d7d7; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,.08); }
-.colorBtn, #arBtn { padding:10px 16px; border:1px solid #222; border-radius:5px; background:#fff; color:#222; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+
+#topControls {
+  position:fixed;
+  top:22px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+
+#colors {
+  display:flex;
+  gap:8px;
+  padding:7px;
+  background:rgba(255,255,255,.96);
+  border:1px solid #d7d7d7;
+  border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,.08);
+}
+
+.colorBtn, #arBtn {
+  padding:10px 16px;
+  border:1px solid #222;
+  border-radius:5px;
+  background:#fff;
+  color:#222;
+  font-size:13px;
+  font-weight:600;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
 .colorBtn.active { background:#222; color:#fff; }
 #arBtn { padding:12px 22px; }
+
+#desktopQr {
+  position:fixed;
+  right:24px;
+  bottom:24px;
+  z-index:9998;
+  width:184px;
+  padding:13px;
+  background:rgba(255,255,255,0.96);
+  border:1px solid #d7d7d7;
+  border-radius:9px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.11);
+  text-align:center;
+}
+#desktopQr p {
+  margin:0 0 9px 0;
+  font-size:14px;
+  line-height:1.3;
+  color:#222;
+  font-weight:600;
+}
+#desktopQr img {
+  display:block;
+  width:150px;
+  height:150px;
+  margin:0 auto;
+}
+#desktopQr small {
+  display:block;
+  margin-top:7px;
+  font-size:11px;
+  line-height:1.25;
+  color:#666;
+}
+
 @media (max-width:768px) {
+  #desktopQr { display:none; }
   #topControls { top:14px; width:94%; }
   #colors { width:100%; justify-content:center; flex-wrap:wrap; box-sizing:border-box; }
   .colorBtn { flex:1 1 28%; padding:9px 10px; font-size:12px; }
@@ -23,9 +91,13 @@ model-viewer { width:100%; height:100vh; background-color:#eeeeee; }
 
 <model-viewer id="mesa"
   src="NODO_MESA_RATONA_EN_CRUZ_KIRI_V12_TAPA18MM_VISIBLE.glb"
-  camera-controls exposure="0.7" shadow-intensity="1"
-  ar ar-modes="webxr scene-viewer quick-look"
-  ar-placement="floor" ar-scale="fixed">
+  camera-controls
+  exposure="0.7"
+  shadow-intensity="1"
+  ar
+  ar-modes="webxr scene-viewer quick-look"
+  ar-placement="floor"
+  ar-scale="fixed">
 </model-viewer>
 
 <div id="topControls">
@@ -37,9 +109,18 @@ model-viewer { width:100%; height:100vh; background-color:#eeeeee; }
   <button id="arBtn">PROBALO EN TU CASA</button>
 </div>
 
+<div id="desktopQr">
+  <p>Escaneá con tu celular para verla en tu casa</p>
+  <img
+    src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fvalerianoonate600-byte.github.io%2Fnodo--ar%2Fmesa-ratona-en-cruz-v12.html"
+    alt="QR para abrir Mesa Ratona en Cruz NODO en el celular">
+  <small>El QR abre este mismo visor en el teléfono.</small>
+</div>
+
 <script>
 const mesa=document.getElementById('mesa');
 const buttons=document.querySelectorAll('.colorBtn');
+
 buttons.forEach(btn=>{
   btn.addEventListener('click',()=>{
     mesa.src=btn.dataset.src;
@@ -47,7 +128,11 @@ buttons.forEach(btn=>{
     btn.classList.add('active');
   });
 });
-document.getElementById('arBtn').addEventListener('click',()=>mesa.activateAR());
+
+document.getElementById('arBtn').addEventListener('click',()=>{
+  mesa.activateAR();
+});
 </script>
+
 </body>
 </html>
