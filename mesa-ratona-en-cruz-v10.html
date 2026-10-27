@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>
+<style>
+html, body { margin:0; width:100%; height:100%; background:#fff; font-family:Arial,sans-serif; }
+model-viewer { width:100%; height:100vh; background-color:#eeeeee; }
+#topControls { position:fixed; top:22px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; align-items:center; gap:10px; }
+#colors { display:flex; gap:8px; padding:7px; background:rgba(255,255,255,0.96); border:1px solid #d7d7d7; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.08); }
+.colorBtn, #arBtn { padding:10px 16px; border:1px solid #222; border-radius:5px; background:#fff; color:#222; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
+.colorBtn.active { background:#222; color:#fff; }
+#arBtn { padding:12px 22px; }
+@media (max-width:768px) {
+  #topControls { top:14px; width:94%; }
+  #colors { width:100%; justify-content:center; flex-wrap:wrap; box-sizing:border-box; }
+  .colorBtn { flex:1 1 28%; padding:9px 10px; font-size:12px; }
+}
+</style>
+</head>
+<body>
+
+<model-viewer
+  id="mesa"
+  src="NODO_MESA_RATONA_EN_CRUZ_KIRI_V10.glb"
+  camera-controls
+  exposure="0.7"
+  shadow-intensity="1"
+  ar
+  ar-modes="webxr scene-viewer quick-look"
+  ar-placement="floor"
+  ar-scale="fixed">
+</model-viewer>
+
+<div id="topControls">
+  <div id="colors">
+    <button class="colorBtn active" data-src="NODO_MESA_RATONA_EN_CRUZ_KIRI_V10.glb">KIRI</button>
+    <button class="colorBtn" data-src="NODO_MESA_RATONA_EN_CRUZ_PARAISO_V9.glb">PARAÍSO</button>
+    <button class="colorBtn" data-src="NODO_MESA_RATONA_EN_CRUZ_CUARZO_V9.glb">CUARZO</button>
+  </div>
+  <button id="arBtn">PROBALO EN TU CASA</button>
+</div>
+
+<script>
+const mesa = document.getElementById('mesa');
+const arBtn = document.getElementById('arBtn');
+const colorButtons = document.querySelectorAll('.colorBtn');
+
+colorButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    mesa.src = btn.dataset.src;
+    colorButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+arBtn.addEventListener('click', () => {
+  mesa.activateAR();
+});
+</script>
+</body>
+</html>
