@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>NODO · Probalo en tu casa</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>
+  <style>
+    :root{--ink:#171717;--paper:#f6f4ef;--panel:rgba(255,255,255,.96);--line:#d8d5ce;--muted:#777;--white:#fff}
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;font-family:Arial,Helvetica,sans-serif;color:var(--ink);background:var(--paper)}
+    body{overflow:hidden}
+    #viewer{width:100%;height:100vh;background:linear-gradient(180deg,#f3f1ec 0%,#ebe8e1 100%)}
+
+    .brand{position:fixed;top:18px;left:20px;z-index:20;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;box-shadow:0 6px 24px rgba(0,0,0,.08)}
+    .brand strong{display:block;font-size:20px;letter-spacing:.18em;line-height:1}
+    .brand span{display:block;margin-top:5px;font-size:11px;letter-spacing:.08em;color:#666;text-transform:uppercase}
+
+    .controls{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:30;width:min(790px,calc(100% - 210px));display:flex;flex-direction:column;align-items:center;gap:8px}
+    .bar{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap;padding:7px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.08)}
+    button{font:inherit}
+    .tab,.product,.color,.ar{border:1px solid #222;background:#fff;color:#222;border-radius:7px;padding:9px 13px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+    .tab.active,.product.active,.color.active{background:#222;color:#fff}
+    .product.pending,.color.pending{border-color:#c7c4bd;color:#aaa;background:#f5f4f1;cursor:not-allowed}
+    .ar{background:#111;color:#fff;padding:11px 20px}
+
+    .info{position:fixed;left:20px;bottom:20px;z-index:20;max-width:360px;padding:14px 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.08)}
+    .info .line{font-size:11px;letter-spacing:.12em;color:#777;text-transform:uppercase;font-weight:700}
+    .info h1{font-size:20px;margin:5px 0 4px;line-height:1.1}
+    .info p{font-size:12px;color:#666;margin:0;line-height:1.35}
+
+    #qr{position:fixed;right:20px;bottom:20px;z-index:20;width:178px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.08);text-align:center}
+    #qr p{margin:0 0 8px;font-size:12px;line-height:1.25;font-weight:700}
+    #qr img{width:145px;height:145px;display:block;margin:auto}
+    #qr small{display:block;margin-top:6px;color:#777;font-size:10px;line-height:1.2}
+
+    #status{position:fixed;inset:0;z-index:15;display:none;align-items:center;justify-content:center;text-align:center;padding:30px;background:linear-gradient(180deg,#f3f1ec,#ebe8e1)}
+    #status .card{max-width:430px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 8px 30px rgba(0,0,0,.08)}
+    #status strong{display:block;font-size:20px;margin-bottom:7px}
+    #status span{font-size:13px;color:#666;line-height:1.45}
+
+    @media(max-width:900px){
+      .brand{top:10px;left:10px;padding:9px 10px}.brand strong{font-size:17px}.brand span{display:none}
+      .controls{top:10px;left:86px;transform:none;width:calc(100% - 96px);align-items:stretch}
+      .bar{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+      .bar::-webkit-scrollbar{display:none}
+      .tab,.product,.color{padding:8px 11px;font-size:11px}
+      .ar{padding:10px 14px;font-size:11px}
+      #qr{display:none}
+      .info{left:10px;right:10px;bottom:10px;max-width:none;padding:10px 12px}
+      .info h1{font-size:17px}
+      .info p{font-size:11px}
+    }
+  </style>
+</head>
+<body>
+  <model-viewer id="viewer"
+    src="NODO_RACK_KIRI_MDF_V2_AR.glb"
+    alt="Mueble NODO"
+    camera-controls
+    touch-action="pan-y"
+    shadow-intensity="1"
+    shadow-softness=".8"
+    exposure=".85"
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    ar-placement="floor"
+    ar-scale="fixed"
+    environment-image="neutral">
+  </model-viewer>
+
+  <div class="brand"><strong>NODO</strong><span>Probalo en tu casa</span></div>
+
+  <div class="controls">
+    <div class="bar" id="lineTabs"></div>
+    <div class="bar" id="productTabs"></div>
+    <div class="bar">
+      <button class="color active" data-color="kiri">KIRI</button>
+      <button class="color" data-color="paraiso">PARAÍSO</button>
+      <button class="color pending" disabled>GRAFITO</button>
+      <button class="color pending" disabled>BLANCO</button>
+      <button class="ar" id="arBtn">PROBALO EN TU CASA</button>
+    </div>
+  </div>
+
+  <div class="info">
+    <div class="line" id="infoLine">SISTEMA</div>
+    <h1 id="infoName">Rack</h1>
+    <p id="infoText">Giralo, elegí una terminación disponible y probalo a escala real desde el celular.</p>
+  </div>
+
+  <div id="qr">
+    <p>Escaneá con tu celular para probar este producto en tu espacio</p>
+    <img id="qrImg" alt="QR visor NODO" />
+    <small>Abre el mismo producto en el visor maestro.</small>
+  </div>
+
+  <div id="status"><div class="card"><strong id="statusTitle">Producto en preparación</strong><span id="statusText">Estamos ajustando el modelo 3D comercial antes de incorporarlo al visor.</span></div></div>
+
+<script>
+const products = {
+  sistema: {
+    label:'SISTEMA',
+    items:[
+      {id:'rack',name:'Rack',models:{kiri:'NODO_RACK_KIRI_MDF_V2_AR.glb',paraiso:'NODO_RACK_PARAISO_V4.glb'}},
+      {id:'biblioteca',name:'Biblioteca',models:{kiri:'NODO_BIBLIOTECA_KIRI_V1.glb',paraiso:'NODO_BIBLIOTECA_PARAISO_V1.glb'}},
+      {id:'escritorio-sistema',name:'Escritorio',models:{kiri:'NODO_ESCRITORIO_KIRI_V2.glb',paraiso:'NODO_ESCRITORIO_PARAISO_V2.glb'}}
+    ]
+  },
+  escultorica: {
+    label:'ESCULTÓRICA',
+    items:[
+      {id:'escritorio-escultorico',name:'Escritorio Inclinado',models:{kiri:'NODO_ESCRITORIO_ESCULTORICO_KIRI_AR_V17_CANTO_TAPA_SEPARADO.glb',paraiso:'NODO_ESCRITORIO_ESCULTORICO_PARAISO_AR_V17_CANTO_TAPA_SEPARADO.glb'}},
+      {id:'silla-escultorica',name:'Silla Escultórica',pending:true}
+    ]
+  },
+  portico: {
+    label:'PÓRTICO',
+    items:[
+      {id:'mesa-comedor-portico',name:'Mesa de Comedor',pending:true},
+      {id:'silla-portico',name:'Silla',models:{kiri:'NODO_SILLA_COUNTRY_KIRI_V2_RESPALDO_CORREGIDO.glb',paraiso:'NODO_SILLA_COUNTRY_PARAISO_V2_RESPALDO_CORREGIDO.glb'}},
+      {id:'mesa-ratona-portico',name:'Mesa Ratona',pending:true}
+    ]
+  },
+  organica: {
+    label:'ORGÁNICA',
+    items:[
+      {id:'mesa-redonda-organica',name:'Mesa Redonda',models:{kiri:'NODO_COMEDOR_CRUZ_KIRI_V1.glb',paraiso:'NODO_COMEDOR_CRUZ_PARAISO_V1.glb'}},
+      {id:'silla-organica',name:'Silla',models:{kiri:'NODO_SILLA_CRUZ_KIRI_V2_RESPALDO_CORREGIDO.glb',paraiso:'NODO_SILLA_CRUZ_PARAISO_V2_RESPALDO_CORREGIDO.glb'}},
+      {id:'banqueta-organica',name:'Banqueta',models:{kiri:'NODO_BANQUETA_CRUZ_KIRI_V3_MAESTRO_CORREGIDO.glb',paraiso:'NODO_BANQUETA_CRUZ_PARAISO_V3_MAESTRO_CORREGIDO.glb'}},
+      {id:'mesa-ratona-organica',name:'Mesa Ratona',models:{kiri:'NODO_MESA_RATONA_ORGANICA_KIRI_V3.glb',paraiso:'NODO_MESA_RATONA_ORGANICA_PARAISO_V3.glb'}}
+    ]
+  }
+};
+
+const viewer=document.getElementById('viewer');
+const lineTabs=document.getElementById('lineTabs');
+const productTabs=document.getElementById('productTabs');
+const colorButtons=[...document.querySelectorAll('.color[data-color]')];
+const status=document.getElementById('status');
+const infoLine=document.getElementById('infoLine');
+const infoName=document.getElementById('infoName');
+const qrImg=document.getElementById('qrImg');
+
+let currentLine='sistema';
+let currentProduct=products.sistema.items[0];
+let currentColor='kiri';
+
+function allItems(){return Object.entries(products).flatMap(([line,data])=>data.items.map(item=>({line,item})));}
+function findProduct(id){return allItems().find(x=>x.item.id===id);}
+
+function buildLines(){
+  lineTabs.innerHTML='';
+  Object.entries(products).forEach(([key,data])=>{
+    const b=document.createElement('button');
+    b.className='tab'+(key===currentLine?' active':'');
+    b.textContent=data.label;
+    b.onclick=()=>selectLine(key);
+    lineTabs.appendChild(b);
+  });
+}
+
+function buildProducts(){
+  productTabs.innerHTML='';
+  products[currentLine].items.forEach(item=>{
+    const b=document.createElement('button');
+    b.className='product'+(item.id===currentProduct.id?' active':'')+(item.pending?' pending':'');
+    b.textContent=item.name+(item.pending?' · EN PREPARACIÓN':'');
+    b.onclick=()=>selectProduct(item);
+    productTabs.appendChild(b);
+  });
+}
+
+function selectLine(key){
+  currentLine=key;
+  currentProduct=products[key].items.find(i=>!i.pending) || products[key].items[0];
+  currentColor='kiri';
+  buildLines();buildProducts();render();
+}
+
+function selectProduct(item){
+  currentProduct=item;
+  currentColor='kiri';
+  buildProducts();render();
+}
+
+function render(){
+  const line=products[currentLine];
+  infoLine.textContent=line.label;
+  infoName.textContent=currentProduct.name;
+  colorButtons.forEach(b=>b.classList.toggle('active',b.dataset.color===currentColor));
+
+  const url=new URL(window.location.href);
+  url.searchParams.set('producto',currentProduct.id);
+  history.replaceState({},'',url);
+  const share=url.toString();
+  qrImg.src='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(share);
+
+  if(currentProduct.pending){
+    status.style.display='flex';
+    viewer.style.visibility='hidden';
+    document.getElementById('arBtn').disabled=true;
+    return;
+  }
+  status.style.display='none';
+  viewer.style.visibility='visible';
+  document.getElementById('arBtn').disabled=false;
+  const src=currentProduct.models[currentColor] || currentProduct.models.kiri;
+  viewer.setAttribute('src',src);
+  viewer.setAttribute('alt',currentProduct.name+' NODO');
+}
+
+colorButtons.forEach(b=>b.addEventListener('click',()=>{
+  if(!currentProduct.pending){currentColor=b.dataset.color;render();}
+}));
+
+document.getElementById('arBtn').addEventListener('click',()=>{
+  if(!currentProduct.pending && viewer.activateAR) viewer.activateAR();
+});
+
+const requested=new URL(window.location.href).searchParams.get('producto');
+if(requested){
+  const found=findProduct(requested);
+  if(found){currentLine=found.line;currentProduct=found.item;}
+}
+buildLines();buildProducts();render();
+</script>
+</body>
+</html>
