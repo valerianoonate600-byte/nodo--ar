@@ -7,8 +7,7 @@
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>
 <style>
 html, body { margin:0; width:100%; height:100%; background:#fff; font-family:Arial,sans-serif; }
-#escritorio { width:100%; height:100vh; background-color:#eeeeee; }
-#arModel { position:fixed; width:1px; height:1px; left:-10px; bottom:-10px; opacity:0; pointer-events:none; }
+model-viewer { width:100%; height:100vh; background-color:#eeeeee; }
 #topControls { position:fixed; top:22px; left:50%; transform:translateX(-50%); z-index:9999; display:flex; flex-direction:column; align-items:center; gap:10px; }
 #colors { display:flex; gap:8px; padding:7px; background:rgba(255,255,255,0.96); border:1px solid #d7d7d7; border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,0.08); }
 .colorBtn, #arBtn { padding:10px 16px; border:1px solid #222; border-radius:5px; background:#fff; color:#222; font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap; }
@@ -22,43 +21,52 @@ html, body { margin:0; width:100%; height:100%; background:#fff; font-family:Ari
 </style>
 </head>
 <body>
-<model-viewer id="escritorio" src="NODO_ESCRITORIO_ESCULTORICO_KIRI_FINAL_SIN_ENCASTRES_REAL_V6 (1).glb" alt="Escritorio Escultórico NODO" camera-controls touch-action="pan-y" interaction-prompt="none" exposure="0.7" shadow-intensity="1"></model-viewer>
 
-<model-viewer id="arModel" src="NODO_ESCRITORIO_ESCULTORICO_KIRI_AR_UNIVERSAL_V11.glb" alt="Escritorio Escultórico NODO AR" ar ar-modes="webxr scene-viewer quick-look" ar-placement="floor" ar-scale="fixed"></model-viewer>
+<model-viewer
+  id="escritorio"
+  src="NODO_ESCRITORIO_ESCULTORICO_KIRI_AR_PIPELINE_CLASICO_V12.glb"
+  alt="Escritorio Escultórico NODO"
+  camera-controls
+  exposure="0.7"
+  shadow-intensity="1"
+  ar
+  ar-modes="webxr scene-viewer quick-look"
+  ar-placement="floor"
+  ar-scale="fixed">
+</model-viewer>
 
 <div id="topControls">
   <div id="colors">
-    <button class="colorBtn active" data-view="NODO_ESCRITORIO_ESCULTORICO_KIRI_FINAL_SIN_ENCASTRES_REAL_V6 (1).glb" data-ar="NODO_ESCRITORIO_ESCULTORICO_KIRI_AR_UNIVERSAL_V11.glb">KIRI</button>
-    <button class="colorBtn" data-view="NODO_ESCRITORIO_ESCULTORICO_PARAISO_FINAL_SIN_ENCASTRES_REAL_V6 (1).glb" data-ar="NODO_ESCRITORIO_ESCULTORICO_PARAISO_AR_UNIVERSAL_V11 (1).glb">PARAÍSO</button>
-    <button class="colorBtn" data-view="NODO_ESCRITORIO_ESCULTORICO_CUARZO_FINAL_SIN_ENCASTRES_REAL_V6.glb" data-ar="NODO_ESCRITORIO_ESCULTORICO_CUARZO_AR_UNIVERSAL_V11.glb">CUARZO</button>
+    <button class="colorBtn active" data-src="NODO_ESCRITORIO_ESCULTORICO_KIRI_AR_PIPELINE_CLASICO_V12.glb">KIRI</button>
+    <button class="colorBtn" data-src="NODO_ESCRITORIO_ESCULTORICO_PARAISO_AR_PIPELINE_CLASICO_V12.glb">PARAÍSO</button>
+    <button class="colorBtn" data-src="NODO_ESCRITORIO_ESCULTORICO_CUARZO_AR_PIPELINE_CLASICO_V12.glb">CUARZO</button>
   </div>
-  <button id="arBtn">PROBALO EN TU CASA</button>
+  <button id="arBtn">VER EN TU ESPACIO</button>
 </div>
 
 <div id="desktopQr">
-  <p>Escaneá con tu celular para probarlo en tu casa</p>
-  <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fvalerianoonate600-byte.github.io%2Fnodo--ar%2Fescritorio-escultorico.html" alt="QR Escritorio Escultórico NODO">
+  <p>Escaneá con tu celular para verlo en tu espacio</p>
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https%3A%2F%2Fvalerianoonate600-byte.github.io%2Fnodo--ar%2Fescritorio-escultorico.html" alt="QR para abrir Escritorio Escultórico NODO AR en el celular">
   <small>El QR abre este mismo visor en el teléfono.</small>
 </div>
 
 <script>
 const escritorio = document.getElementById('escritorio');
-const arModel = document.getElementById('arModel');
 const arBtn = document.getElementById('arBtn');
 const colorButtons = document.querySelectorAll('.colorBtn');
 
 colorButtons.forEach(btn => {
   btn.addEventListener('click', () => {
-    escritorio.src = encodeURI(btn.dataset.view);
-    arModel.src = encodeURI(btn.dataset.ar);
+    escritorio.src = btn.dataset.src;
     colorButtons.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
   });
 });
 
 arBtn.addEventListener('click', () => {
-  arModel.activateAR();
+  escritorio.activateAR();
 });
 </script>
+
 </body>
 </html>
