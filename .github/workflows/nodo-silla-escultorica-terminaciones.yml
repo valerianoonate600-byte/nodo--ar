@@ -1,0 +1,74 @@
+name: Preparar silla escultorica NODO
+on:
+  push:
+    paths:
+      - '.github/workflows/nodo-silla-escultorica-terminaciones.yml'
+permissions:
+  contents: write
+jobs:
+  silla:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install numpy trimesh pillow
+      - name: Ajustar geometria real y materiales originales
+        shell: bash
+        run: |
+          python - <<'PY'
+          import numpy as np, trimesh, copy
+          from pathlib import Path
+          src='NODO_SILLA_ESCULTORICA_SEIS_PIEZAS_FINAL_GEOMETRIA_V1.glb'
+          sources={
+             'KIRI':'NODO_MESA_RATONA_EN_CRUZ_KIRI_V14_AR_YUP.glb',
+             'PARAISO':'NODO_MESA_RATONA_EN_CRUZ_PARAISO_V14_AR_YUP.glb',
+             'CUARZO':'NODO_MESA_RATONA_EN_CRUZ_CUARZO_V14_AR_YUP.glb'
+          }
+          base=trimesh.load(src,force='scene')
+          assert len(base.geometry)==6, 'La silla no tiene seis piezas'
+          for acabado,referencia in sources.items():
+            ref=trimesh.load(referencia,force='scene')
+            palette={}
+            for mesh in ref.geometry.values():
+              if mesh.visual.kind=='texture':
+                mat=mesh.visual.material
+                palette[mat.name]=np.asarray(mat.main_color,dtype=np.uint8)
+            body=palette['NODO_'+acabado]
+            edge=palette['NODO_CANTO_NATURAL']
+            scene=copy.deepcopy(base)
+            for key,m in scene.geometry.items():
+              normals=m.face_normals
+              areas=m.area_faces
+              anchor=normals[int(np.argmax(areas))]
+              broad=(np.abs(normals @ anchor)>.94)
+              cols=np.tile(edge,(len(m.faces),1))
+              cols[broad]=body
+              m.visual=trimesh.visual.ColorVisuals(mesh=m,face_colors=cols)
+            # Original: milimetros con eje Z vertical. El visor usa metros y eje Y vertical.
+            T=np.eye(4)
+            T[:3,:3]=np.array([[1,0,0],[0,0,1],[0,-1,0]],dtype=float)*.001
+            scene.apply_transform(T)
+            mins,maxs=scene.bounds
+            U=np.eye(4)
+            U[:3,3]=[-(mins[0]+maxs[0])/2,-mins[1],-(mins[2]+maxs[2])/2]
+            scene.apply_transform(U)
+            dims=scene.extents
+            assert np.allclose(dims,[.53,.79,.50],atol=.004),f'Escala geometrica incorrecta: {dims}'
+            # Los laterales parten de 18 mm exactos en el archivo CNC.
+            out='NODO_SILLA_ESCULTORICA_'+acabado+'_MDF_V1.glb'
+            scene.export(out)
+            verify=trimesh.load(out,force='scene')
+            assert np.allclose(verify.extents,dims,atol=1e-5)
+            print(out,'dimensiones (m):',np.round(dims,3),'caras:',sum(len(x.faces) for x in verify.geometry.values()),'color:',body.tolist(),'canto:',edge.tolist())
+          PY
+      - name: Guardar tres modelos corregidos en GitHub
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add NODO_SILLA_ESCULTORICA_*_MDF_V1.glb
+          git commit -m "Agregar silla escultorica 6 piezas a escala real en tres terminaciones originales"
+          git push
