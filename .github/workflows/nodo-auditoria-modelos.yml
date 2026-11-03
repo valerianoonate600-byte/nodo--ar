@@ -70,6 +70,14 @@ jobs:
             allr.append({'filename':fname,'error':str(e)})
           open('nodo_qa/reporte.json','w').write(json.dumps(allr,indent=2,ensure_ascii=False))
           PY
+      - name: Incluir archivos de referencia para revision local
+        run: |
+          mkdir -p nodo_qa/modelos
+          cp NODO_SILLA_ESCULTORICA_SEIS_PIEZAS_FINAL_GEOMETRIA_V1.glb nodo_qa/modelos/
+          cp NODO_SILLA_ESCULTORICA_RECUPERADA_VERSION_BUENA.glb nodo_qa/modelos/
+          cp NODO_MESA_RATONA_EN_CRUZ_KIRI_V14_AR_YUP.glb nodo_qa/modelos/
+          cp NODO_MESA_RATONA_EN_CRUZ_PARAISO_V14_AR_YUP.glb nodo_qa/modelos/
+          cp NODO_MESA_RATONA_EN_CRUZ_CUARZO_V14_AR_YUP.glb nodo_qa/modelos/
       - uses: actions/upload-artifact@v4
         with:
           name: nodo-qa-modelos
