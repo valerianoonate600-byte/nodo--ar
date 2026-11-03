@@ -1,0 +1,91 @@
+name: Extract arrime materials
+on:
+  push:
+    paths:
+      - '.github/workflows/extract-arrime-materials.yml'
+permissions:
+  contents: read
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install pillow
+      - name: Extract material colors
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, struct, io
+          from pathlib import Path
+          from PIL import Image, ImageStat
+
+          files = [
+              'NODO_ARRIME_CRUZ_KIRI_V1.glb',
+              'NODO_ARRIME_CRUZ_PARAISO_V1.glb',
+              'NODO_ARRIME_CRUZ_CUARZO_V1.glb',
+          ]
+
+          def read_glb(path):
+              data = Path(path).read_bytes()
+              magic, version, total = struct.unpack_from('<4sII', data, 0)
+              assert magic == b'glTF'
+              off = 12; js=None; binchunk=b''
+              while off < len(data):
+                  clen, ctype = struct.unpack_from('<II', data, off); off += 8
+                  chunk = data[off:off+clen]; off += clen
+                  if ctype == 0x4E4F534A:
+                      js = json.loads(chunk.decode('utf-8').rstrip('\x00 '))
+                  elif ctype == 0x004E4942:
+                      binchunk = chunk
+              return js, binchunk
+
+          def image_bytes(js, binchunk, image_idx):
+              im = js.get('images', [])[image_idx]
+              if 'bufferView' not in im:
+                  return None
+              bv = js['bufferViews'][im['bufferView']]
+              start = bv.get('byteOffset',0)
+              end = start + bv['byteLength']
+              return binchunk[start:end]
+
+          out = {}
+          for f in files:
+              js, binchunk = read_glb(f)
+              mats=[]
+              for i,mat in enumerate(js.get('materials',[])):
+                  pbr=mat.get('pbrMetallicRoughness',{})
+                  factor=pbr.get('baseColorFactor',[1,1,1,1])
+                  item={'index':i,'name':mat.get('name',''),'baseColorFactor':factor}
+                  texinfo=pbr.get('baseColorTexture')
+                  if texinfo is not None:
+                      tex=js['textures'][texinfo['index']]
+                      src=tex.get('source')
+                      if src is not None:
+                          raw=image_bytes(js,binchunk,src)
+                          if raw:
+                              try:
+                                  im=Image.open(io.BytesIO(raw)).convert('RGBA')
+                                  im.thumbnail((256,256))
+                                  px=[p for p in im.getdata() if p[3] > 8]
+                                  if px:
+                                      n=len(px)
+                                      mean=[sum(p[c] for p in px)/n for c in range(3)]
+                                      # factor-adjusted mean in sRGB space, good enough for matching the authored texture visually
+                                      mean_factor=[round(mean[c]*factor[c],2) for c in range(3)]
+                                      item['textureMeanRGB']=[round(x,2) for x in mean]
+                                      item['factorAdjustedMeanRGB']=mean_factor
+                                      item['imageSize']=list(Image.open(io.BytesIO(raw)).size)
+                              except Exception as e:
+                                  item['textureError']=str(e)
+                  mats.append(item)
+              out[f]={'materials':mats}
+          Path('arrime-materials.json').write_text(json.dumps(out,indent=2,ensure_ascii=False))
+          print(Path('arrime-materials.json').read_text())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arrime-materials
+          path: arrime-materials.json
