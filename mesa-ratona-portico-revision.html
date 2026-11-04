@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NODO · Mesa Ratona Pórtico · revisión</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;font-family:Arial,Helvetica,sans-serif;background:#f4f1ec;color:#252525}
+model-viewer{width:100%;height:100dvh;background:#eeeae3}
+.brand{position:fixed;top:14px;left:16px;z-index:5;background:#fffefadf;border:1px solid #d8d2c9;border-radius:10px;padding:12px 15px}
+.brand b{display:block;font-size:19px;letter-spacing:.26em}.brand small{font-size:9px;letter-spacing:.1em;color:#777}
+.colors{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:5;display:flex;gap:5px;padding:6px;background:#fffdf8ed;border:1px solid #d8d2c9;border-radius:10px;box-shadow:0 6px 20px #0001}
+.colors button{border:1px solid #292929;background:#fff;color:#292929;padding:10px 12px;border-radius:6px;font:bold 11px Arial;cursor:pointer}
+.colors button.active{background:#222;color:#fff}
+.info{position:fixed;bottom:14px;left:16px;z-index:5;background:#fffefaf2;border:1px solid #d8d2c9;border-radius:10px;padding:11px 15px;max-width:360px}
+.info strong{display:block;font-size:15px}.info small{display:block;margin-top:6px;font-size:11px;line-height:1.4;color:#6b6863}
+.ar{border:0;border-radius:7px;padding:14px 20px;background:#1a1a1a;color:white;font:bold 12px Arial}
+#qr{position:fixed;right:16px;bottom:14px;z-index:5;background:#fffefaf2;border:1px solid #d8d2c9;border-radius:10px;padding:10px;text-align:center;width:180px}
+#qr img{display:block;width:138px;height:138px;margin:auto}#qr span{font-size:10px;color:#5b5854;display:block;margin-top:5px}
+#status{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:white;border:1px solid #cfc8bd;border-radius:8px;padding:12px;z-index:6;font-size:12px;display:none}
+@media(max-width:760px){.brand{top:10px;left:8px;padding:9px}.brand b{font-size:15px}.brand small{font-size:7px}
+.colors{top:10px;left:auto;right:8px;transform:none}.colors button{font-size:10px;padding:8px}
+.info{left:8px;right:8px;bottom:8px;max-width:none}.info small{font-size:10px}#qr{display:none}}
+</style></head><body>
+<div class="brand"><b>NODO</b><small>REVISIÓN 3D · NO PUBLICADO</small></div>
+<div class="colors"><button type="button" class="active" data-file="NODO_MESA_RATONA_PORTICO_KIRI_MDF18_PRUEBA.glb">KIRI</button><button type="button" class="" data-file="NODO_MESA_RATONA_PORTICO_PARAISO_MDF18_PRUEBA.glb">PARAÍSO</button><button type="button" class="" data-file="NODO_MESA_RATONA_PORTICO_CUARZO_MDF18_PRUEBA.glb">CUARZO</button></div>
+<model-viewer id="viewer" src="NODO_MESA_RATONA_PORTICO_KIRI_MDF18_PRUEBA.glb" alt="Mesa Ratona Pórtico · revisión NODO" camera-controls disable-pan interaction-prompt="none" touch-action="pan-y" shadow-intensity="1" shadow-softness=".8" exposure=".8" environment-image="neutral" ar ar-modes="webxr scene-viewer quick-look" ar-placement="floor" ar-scale="fixed">
+<button class="ar" slot="ar-button">PROBALO EN TU CASA</button>
+</model-viewer>
+<div class="info"><strong>Mesa Ratona Pórtico · revisión</strong><small>120 × 60 × 43,6 cm · MDF 18 mm · Kiri, Paraíso y Cuarzo · Giro manual · MODELO DE REVISIÓN</small></div>
+<div id="qr"><img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fproba.nodomuebles.com.ar%2Fmesa-ratona-portico-revision.html" alt="QR: abrir este visor en el teléfono"><span>Escaneá para abrir en tu celular</span></div>
+<div id="status" role="status">No se pudo cargar el modelo. Volvé a intentar.</div>
+<script>
+const v=document.getElementById('viewer'),buttons=[...document.querySelectorAll('.colors button')];
+buttons.forEach(b=>b.addEventListener('click',()=>{buttons.forEach(t=>t.classList.remove('active'));b.classList.add('active');v.src=b.dataset.file;document.getElementById('status').style.display='none';}));
+v.addEventListener('error',()=>document.getElementById('status').style.display='block');
+v.addEventListener('load',()=>document.getElementById('status').style.display='none');
+</script></body></html>
