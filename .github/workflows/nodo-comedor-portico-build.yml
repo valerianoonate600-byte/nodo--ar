@@ -1,0 +1,74 @@
+name: Corregir Mesa de Comedor Pórtico desde DXF
+on:
+  push:
+    paths: ['.github/workflows/nodo-comedor-portico-build.yml']
+permissions:
+  contents: write
+jobs:
+  build-models:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install numpy scipy trimesh shapely triangle
+      - name: Construir 3 modelos desde geometria exacta del DXF original
+        shell: bash
+        run: |
+          python - <<'PY'
+          import zlib, base64, json, copy
+          import numpy as np, trimesh
+          from shapely.geometry import Polygon
+          DATA="eNqFmFtuLCEMRDcUIfOGtUTZ/zYujR+U6ZbuT8JxjO2BwjD5/f2tFGKbP4Mo0N/Pb8zLQAfLM/jp1WF1vgwwBJczecFvjxRGyT99RZnL0MYMsXbgEuai+lgPx/LMQv+4fi+2eMZrJvgLS7ynghhzDwQlxLh8MtSwDBEmHYNFPVMk7QlqhhJDdlPYAJWk9dkaFJJaChPqSHWEDmUIW0jzl5wWz3i4tRPGtcilhvpTR9MqxdDso+dVdlpBa5PFyTmGurIeQ+ohuylsgKA6ZUZeHAu6DVBJysVXkmK+K0k0fCXHsBPjFDZAUJ2Sp6+EDajQ4QU6UJ/Dy3Pe6pxenBO1Ob00x4cyxyXM4XQ5LlnOlyrnJcrpNDkvSY63IocX5EA9Di/HeatxejFO1OL0UoTMPa1YRzKM7SxzKKDBJzEosBYnWUYLpc6iPQ1lytupjkQYTULirhKTYIbFSZTRQqmzaE1DmdJSXq2xzTDneJbkoShNN81AyWhFrMOoUGgeLMYm/kPPfpilYa8TcYGMG13jNiJT7DWUGzXCWokLLPgSxE0Ks95gn0E42m1EMZSE3MIcwBEXTvBEy7l9cMwu+YX5+YnF5NnDQENJqzlBdcC7usO7nAshPpfzMpQqEySdx16jWxvgnf3wTndjIr8Yb4NudVp5+8FIM6Q3riaTgFeJ+8/Uv9C8lTlYGxkSK4mvoERq9YPMtWKcVFcXeJG4CkqclD7IXBPGibQOVGnGBBnJrWfKHyi7wUdciY+40j7HDlQBBOIgp5yU36i641xKnEuJwyMctQtqTO48+bzrcCxHzBpbXyGJopbSVu+fc1oxh7mcw9LSHJ5gjLJNu7N5aBVa20UqxUYvWnchdrcLzZc73I2WZfe4G8151g+0D2Z9UD+4nm5n2ecbLdEvrp1xC6tn/DK05uq4MK9ru2JZjyaiM6z9xg4IvGs8zC3vwhNfO+BtyBNb3oWluAZ4kLtvwX7nqS/iBiQLc7FuPLc+k8FubZ564J7JRNjlHKgfk8TgluZA/BgImhuO1anCdG5kDsSNgaCl4VidEkzX3iZIJwvhYqX8IllmaTUFupoANxoY654SbDc5LaT8gaIkTqTEmZQ4vAPTr6DG5G4j6ic4GASn5mlqtUW4doT0glCU62t9dYnnfvB3UusR7z2mqldE6z0kZxjrQTqcYYQPlnid+lPx4Yy3Uy9vIvCjE8ONM0owf2gTZrd0j+3l+EGkJ8rGo/uhpMv5GusZc/9zoNeFHB3EMNtZ/Iz7UnFbqt+Vem/Ka0/CGyXU8BsSVxegF+mjiFEfIfRB9iQhjFNz/CAVZz7K3d8zdxbCAqRFbZDzvr+rKeydsG512sUeF+0DvCyGvGoHnzX1JFFyem6v04J808H+Y49JgJxfIEd4V+1BA7gILEVP+gJoH2Rvz0z/e5dKcj5GF9m7BaPIEXUkydlRIY1A2TaCQ9quuC3yezT8JknDAXbbxKihqtsobnoOREgMBGLEsTplmM5ydqDXE6la//7+AeBRgFU="
+          pts=[np.array(a,dtype=float) for a in json.loads(zlib.decompress(base64.b64decode(DATA)))]
+          outer=pts[0]; holes=pts[1:11]
+          segments=[('Tapa MDF 18mm',trimesh.creation.extrude_polygon(Polygon(outer,holes=holes),height=18,engine='triangle'),'top')]
+          segments[0][1].apply_transform(trimesh.transformations.rotation_matrix(np.pi/2,[1,0,0]))
+          segments[0][1].apply_translation([-700,799,-400])
+          for j,center_z in [(11,-311),(12,309)]:
+              poly=pts[j].copy()
+              if j==12: poly[:,1]=795-poly[:,1]
+              mesh=trimesh.creation.extrude_polygon(Polygon(poly),height=18,engine='triangle')
+              mesh.apply_translation([-668,0,center_z-9])
+              segments.append((f'Bastidor longitudinal {j}',mesh,'long'))
+          for j,center_x in [(13,-636),(14,637)]:
+              poly=pts[j].copy()
+              if j==14: poly[:,1]=795-poly[:,1]
+              mesh=trimesh.creation.extrude_polygon(Polygon(poly),height=18,engine='triangle')
+              mesh.apply_transform(trimesh.transformations.rotation_matrix(-np.pi/2,[0,1,0]))
+              mesh.apply_translation([center_x+9,0,-370])
+              segments.append((f'Bastidor transversal {j}',mesh,'short'))
+          edge=np.array([138,103,56,255],dtype=np.uint8)
+          palette={'KIRI':[196,184,162,255],'PARAISO':[198,179,175,255],'CUARZO':[72,89,114,255]}
+          for tone,color in palette.items():
+              scene=trimesh.Scene()
+              for name,source,kind in segments:
+                  m=source.copy()
+                  assert m.is_watertight,name
+                  axis={'top':1,'long':2,'short':0}[kind]
+                  normals=np.abs(m.face_normals)
+                  facecols=np.tile(edge,(len(m.faces),1))
+                  facecols[normals[:,axis]>.90]=np.array(color,dtype=np.uint8)
+                  m.visual=trimesh.visual.ColorVisuals(mesh=m,face_colors=facecols)
+                  m.apply_scale(.001)
+                  scene.add_geometry(m,geom_name=name)
+              assert len(scene.geometry)==5,'Faltan piezas del plano'
+              assert np.allclose(scene.extents,[1.4,.799,.8],atol=.002),scene.extents
+              out=f'NODO_MESA_COMEDOR_PORTICO_{tone}_MDF18_DXF_V2.glb'
+              scene.export(out)
+              check=trimesh.load(out,force='scene')
+              assert np.allclose(check.extents,scene.extents,atol=.002)
+              assert len(check.geometry)==5
+              print('CORRECTO',out,'medidas m',np.round(check.extents,3),'piezas',len(check.geometry))
+          PY
+      - name: Guardar modelos corregidos
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add NODO_MESA_COMEDOR_PORTICO_*_MDF18_DXF_V2.glb
+          git commit -m "Corregir 3D Mesa Comedor Portico desde DXF maestro, 140x80x80 MDF18"
+          git push
