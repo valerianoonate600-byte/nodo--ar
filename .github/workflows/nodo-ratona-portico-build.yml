@@ -1,0 +1,76 @@
+name: Construir ratona Portico CNC prueba
+on:
+  push:
+    paths:
+      - '.github/workflows/nodo-ratona-portico-build.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar herramientas 3D
+        run: python -m pip install numpy scipy trimesh shapely triangle
+      - name: Construir y verificar geometria DXF
+        shell: bash
+        run: |
+          python - <<'PY'
+          import base64, zlib, json, numpy as np, trimesh
+          from shapely.geometry import Polygon
+          import copy
+          DATA="eNptllmSxSAIRTeUssApupZXvf9tNCpjkj8PDRdESL/f79cgZWhXB0jwd/0QyQCGeR2u1iI6X6z3dXAHnqNzsnCCX4U0r9pbwnYTHxw9jVoWLnu/6sSES7Auu+FM6JwPqpQ4d5J0UhtX5jbmtqxallpH2AHGFHE1ihu1GpfO+upfcCdQPeVKdzF/ZtbzFfQRClBc+Xrh20k5K8I51xmSK55c7HyQpbTriMV3HUuNXccyfdcVV5vN+aBKiTMM3/WDKzP2nKbdGamybnfGMaxQQb2GOPMlRUqwjXQ7543uzggzp+JSI9YELjfiSHn69GIxUYmRnKKpTBVDiBCLrwQf/ReDNpUMe4y16bRZ62/VG+I7iMGJSgi/hYnaa+Bj/8SgS6VBsnQq6wxxD8XgRCWEd9FEdRvlMWX75K2Nh9seZd0u9eftUz3hMx3mz9Ni26hvqSnlsZ1B5kHLUJMpa5ikVmE1yJRYkA2Oq4jeol/yab0f53KA5iqez9GF7iM1GiAT0cC0YZhnguyw7G+9p2KfbXec4rPVIxWaDNBUQieT0pYOsGZhDkkVqObjeDrypDvt3IzU0/3H+4PU9fY6rdPovohdGVmnzQ9S1+l15iyuciF2ZZTqIH+hVivM18b9zg+0huFpxNswJSA+DGJ8GmL/OIz6xJzvyUVm8+QK1M33MX6S2xvCCDKLHMATJBPU/iLw7QzgmhOadf4tZ3Vv9CmL5yK/bdoTeNtc9Dm7XAAffHzvOx5Z2q+gu0b8ZSWjUDHlCGVKrnqn7LnldA/PI71QpFZBgDZxEHaSSYd1Y2kktD925ZPVvYQLtPxB7MqoSqe7L1b34bXOEylRK/ODfGvmo1c0tbFZNDRvVj2X+e/vH1wSdcY="
+          arrays=json.loads(zlib.decompress(base64.b64decode(DATA)))
+          a=[np.array(x,dtype=float) for x in arrays]
+          outer,holes,lon,short=a[0],a[1:11],a[11],a[12]
+          body=trimesh.creation.extrude_polygon(Polygon(outer,holes),height=18,engine='triangle')
+          body.apply_transform(trimesh.transformations.rotation_matrix(np.pi/2,[1,0,0]))
+          body.apply_translation([-600,436,-300])
+          chunks=[("Tapa",body,"top")]
+          for label,z in [("Lado 1",-241),("Lado 2",241)]:
+              m=trimesh.creation.extrude_polygon(Polygon(lon),height=18,engine='triangle')
+              m.apply_translation([-581.8,0,z-9])
+              chunks.append((label,m,"long"))
+          for label,x in [("Frente",-550),("Contrafrente",550)]:
+              m=trimesh.creation.extrude_polygon(Polygon(short),height=18,engine='triangle')
+              m.apply_transform(trimesh.transformations.rotation_matrix(-np.pi/2,[0,1,0]))
+              m.apply_translation([x+9,0,-291])
+              chunks.append((label,m,"short"))
+          # CNC model is in millimeters. Conversion to meters for model-viewer/AR.
+          edge=np.array([138,103,56,255],dtype=np.uint8)
+          palette={"KIRI":[196,184,162,255],"PARAISO":[198,179,175,255],"CUARZO":[72,89,114,255]}
+          for key,rgba in palette.items():
+              scene=trimesh.Scene()
+              color=np.array(rgba,dtype=np.uint8)
+              for name,m0,part in chunks:
+                  m=m0.copy()
+                  normals=np.abs(m.face_normals)
+                  axis={'top':1,'long':2,'short':0}[part]
+                  broad=normals[:,axis]>.9
+                  colors=np.repeat(edge[None,:],len(m.faces),axis=0)
+                  colors[broad]=color
+                  m.visual.face_colors=colors
+                  m.apply_scale(.001)
+                  assert m.is_watertight, name
+                  scene.add_geometry(m,geom_name=name)
+              assert np.allclose(scene.extents,[1.2,.436,.6],atol=.002),scene.extents
+              path=f'NODO_MESA_RATONA_PORTICO_{key}_MDF18_PRUEBA.glb'
+              scene.export(path)
+              verify=trimesh.load(path,force='scene')
+              assert np.allclose(verify.extents,scene.extents,atol=.002)
+              print('VALIDADO',path,'dimensiones:',np.round(verify.extents,3),'piezas:',len(verify.geometry))
+          PY
+      - name: Guardar los tres modelos GLB
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add NODO_MESA_RATONA_PORTICO_*_MDF18_PRUEBA.glb
+          git commit -m "Agregar modelos de prueba ratona Portico desde DXF original"
+          git push
