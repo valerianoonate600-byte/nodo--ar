@@ -1,0 +1,42 @@
+name: Revisar texturas reales NODO
+on:
+  push:
+    paths: ['.github/workflows/nodo-revisar-texturas.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspeccionar materiales de visores aprobados
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,struct,os
+          paths=[
+          'NODO_ARRIME_CRUZ_KIRI_V1.glb','NODO_ARRIME_CRUZ_PARAISO_V1.glb','NODO_ARRIME_CRUZ_CUARZO_V1.glb',
+          'NODO_RACK_KIRI_MDF_V2_AR.glb','NODO_RACK_PARAISO_V4.glb','NODO_RACK_CUARZO_V1.glb',
+          'NODO_COMEDOR_COUNTRY_KIRI_V1_REVISION.glb',
+          'NODO_MESA_COMEDOR_PORTICO_KIRI_APROBADA_DXF.glb']
+          for path in paths:
+            raw=open(path,'rb').read()
+            jl=struct.unpack_from('<I',raw,12)[0]
+            gltf=json.loads(raw[20:20+jl])
+            materials=[]
+            for m in gltf.get('materials',[]):
+              pbr=m.get('pbrMetallicRoughness',{})
+              materials.append({'name':m.get('name'),'baseColorFactor':pbr.get('baseColorFactor'),'baseColorTexture':pbr.get('baseColorTexture'),'alphaMode':m.get('alphaMode'),'emissiveTexture':m.get('emissiveTexture')})
+            images=gltf.get('images',[])
+            tex=gltf.get('textures',[])
+            samplers=gltf.get('samplers',[])
+            meshes=gltf.get('meshes',[])
+            attrs=[]
+            for mesh in meshes[:5]:
+              attrs.extend([{'name':mesh.get('name'),'attributes':p.get('attributes'),'material':p.get('material')} for p in mesh.get('primitives',[])])
+            print('FILE',path,'bytes',len(raw),'materialcount',len(materials),'images',len(images),'textures',len(tex),'meshes',len(meshes))
+            print('MATERIALS',json.dumps(materials[:15]))
+            print('IMAGES',json.dumps(images[:12]))
+            print('TEXTURES',json.dumps(tex[:12]))
+            print('MESHES',json.dumps(attrs[:12]))
+          PY
