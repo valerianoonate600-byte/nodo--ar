@@ -1,0 +1,100 @@
+name: NODO Texturas originales para Mesa Comedor Pórtico
+on:
+  push:
+    paths:
+      - '.github/workflows/nodo-comedor-texturas-reales.yml'
+permissions:
+  contents: write
+jobs:
+  materiales:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar herramientas 3D
+        run: python -m pip install "numpy<3" scipy trimesh pillow
+      - name: Usar las texturas ya aprobadas de Mesa de Arrime NODO
+        shell: bash
+        run: |
+          python - <<'PY'
+          import copy, numpy as np, trimesh
+          from trimesh.visual.texture import TextureVisuals
+          references={
+             'KIRI':'NODO_ARRIME_CRUZ_KIRI_V1.glb',
+             'PARAISO':'NODO_ARRIME_CRUZ_PARAISO_V1.glb',
+             'CUARZO':'NODO_ARRIME_CRUZ_CUARZO_V1.glb'
+          }
+          for color,reference in references.items():
+              source=trimesh.load(reference,force='scene')
+              materials={}
+              for mesh in source.geometry.values():
+                  v=mesh.visual
+                  if v.kind != 'texture': continue
+                  mat=v.material
+                  name=mat.name or ''
+                  if name=='MDF fresado fotografico':
+                      materials['edge']=copy.deepcopy(mat)
+                  elif name in ['Kiri fotografico','FAPLAC_PARAISO_CARAS','CUARZO_CARAS_REFERENCIA_FOTOGRAFICA']:
+                      materials['faces']=copy.deepcopy(mat)
+              assert set(materials)=={'faces','edge'},(color,list(materials))
+              inp='NODO_MESA_COMEDOR_PORTICO_'+color+'_APROBADA_DXF.glb'
+              output='NODO_MESA_COMEDOR_PORTICO_'+color+'_FAPLAC_REAL.glb'
+              original=trimesh.load(inp,force='scene')
+              original_meshes=list(original.dump())
+              assert len(original_meshes)==5,(color,len(original_meshes))
+              scene=trimesh.Scene()
+              for mesh in original_meshes:
+                  name=(mesh.metadata or {}).get('name','')
+                  extent=mesh.extents
+                  if np.argmin(extent)==1:
+                      kind='top'
+                      axis=1
+                      uvaxes=(0,2)
+                      uvspan=(1.35,.8)
+                  elif np.argmin(extent)==2:
+                      kind='long'
+                      axis=2
+                      uvaxes=(0,1)
+                      uvspan=(1.35,.79)
+                  elif np.argmin(extent)==0:
+                      kind='short'
+                      axis=0
+                      uvaxes=(2,1)
+                      uvspan=(.77,.79)
+                  else:
+                      raise ValueError((name,extent))
+                  normals=np.abs(mesh.face_normals)
+                  masks={'faces':normals[:,axis]>.90,'edge':normals[:,axis]<=.90}
+                  assert masks['faces'].sum()>0 and masks['edge'].sum()>0,(kind,len(mesh.faces))
+                  for role,mask in masks.items():
+                      piece=mesh.submesh([np.where(mask)[0]],append=True,repair=False)
+                      assert len(piece.faces)
+                      vx=piece.vertices
+                      uv=np.stack((vx[:,uvaxes[0]]/uvspan[0], vx[:,uvaxes[1]]/uvspan[1]),axis=1)
+                      if role=='edge':
+                          # Canto natural, con una escala acorde a una veta fina de 18 mm.
+                          uv=uv*1.1
+                      piece.visual=TextureVisuals(uv=uv,material=copy.deepcopy(materials[role]))
+                      scene.add_geometry(piece,geom_name=kind+'_'+role+'_'+str(len(scene.geometry)))
+              assert len(scene.geometry)==10,len(scene.geometry)
+              assert np.allclose(scene.extents,original.extents,atol=1e-5),(scene.extents,original.extents)
+              scene.export(output)
+              result=trimesh.load(output,force='scene')
+              assert np.allclose(result.extents,original.extents,atol=1e-5)
+              names=[m.visual.material.name for m in result.geometry.values() if m.visual.kind=='texture']
+              assert any('MDF fresado' in (x or '') for x in names)
+              assert len(result.geometry)==10
+              print('OK',color,output,'size',__import__('os').path.getsize(output),'geometria',np.round(result.extents,4),'materiales:',set(names))
+          PY
+      - name: Incorporar los modelos texturados
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add NODO_MESA_COMEDOR_PORTICO_*_FAPLAC_REAL.glb
+          git commit -m "Mesa comedor Pórtico con texturas fotográficas y cantos NODO existentes"
+          git push
