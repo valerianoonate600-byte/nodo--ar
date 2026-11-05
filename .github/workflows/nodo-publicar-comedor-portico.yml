@@ -1,0 +1,96 @@
+name: NODO publicar mesa comedor Pórtico aprobada
+on:
+  push:
+    paths:
+      - '.github/workflows/nodo-publicar-comedor-portico.yml'
+permissions:
+  contents: write
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar geometría 3D
+        run: python -m pip install numpy scipy trimesh shapely pillow
+      - name: Generar GLB desde perfiles originales del DXF Country
+        shell: bash
+        run: |
+          python - <<'PY'
+          import numpy as np, trimesh, json, zlib, base64
+          from shapely.geometry import Polygon,box
+          from shapely import constrained_delaunay_triangles
+          DATA="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"
+          sh={k:np.array(v,dtype=float) for k,v in json.loads(zlib.decompress(base64.b64decode(DATA))).items()}
+          o=sh['70']
+          mini=o.min(axis=0)
+          t=Polygon(np.column_stack((o[:,1]-mini[1]-700, -(o[:,0]-mini[0]-400))))
+          assert t.is_valid
+          def extrude(p):
+            tri=list(constrained_delaunay_triangles(p).geoms)
+            verts=[]; faces=[]; ids={}
+            for tr in tri:
+              row=[]
+              for xy in np.asarray(tr.exterior.coords)[:3]:
+                key=tuple(np.round(xy,7).tolist())
+                if key not in ids:
+                  ids[key]=len(verts); verts.append(list(xy))
+                row.append(ids[key])
+              faces.append(row)
+            return trimesh.creation.extrude_triangulation(np.asarray(verts),np.asarray(faces),18)
+          def prof(h,holes,reflect=False):
+            origin=sh[h].min(axis=0)
+            ext=sh[h]-origin
+            inner=[sh[x]-origin for x in holes]
+            if reflect:
+              ext[:,1]=795-ext[:,1]
+              inner=[np.column_stack((v[:,0],795-v[:,1])) for v in inner]
+            poly=Polygon(ext,inner).intersection(box(-10,-5,1400,777))
+            assert poly.geom_type=='Polygon' and poly.is_valid
+            return poly
+          parts=[]
+          top=extrude(t)
+          top.apply_transform(np.array([[1,0,0,0],[0,0,1,0],[0,-1,0,0],[0,0,0,1]],dtype=float))
+          top.apply_translation([0,777,0])
+          parts.append(('Tapa',top,'top'))
+          for handle,hs,z,reflect in [('89',['85','86','87','88'],-310,False),('8E',['8A','8B','8C','8D'],310,True)]:
+            m=extrude(prof(handle,hs,reflect))
+            m.apply_translation([-668,0,z-9])
+            parts.append(('Lateral '+handle,m,'long'))
+          for handle,hs,x,reflect in [('83',['7B','7C','7D','7E'],-636.4,False),('84',['7F','80','81','82'],636.4,True)]:
+            m=extrude(prof(handle,hs,reflect))
+            m.apply_transform(np.array([[0,0,-1,0],[0,1,0,0],[1,0,0,0],[0,0,0,1]],dtype=float))
+            m.apply_translation([x+9,0,-370])
+            parts.append(('Travesaño '+handle,m,'short'))
+          assert len(parts)==5
+          edge=(177,151,110,255)
+          colors={'KIRI':(196,184,162,255),'PARAISO':(198,179,175,255),'CUARZO':(72,89,114,255)}
+          for color,rgba in colors.items():
+            sc=trimesh.Scene()
+            for name,p,kind in parts:
+              m=p.copy()
+              assert m.is_watertight
+              norm=np.abs(m.face_normals)
+              axis={'top':1,'long':2,'short':0}[kind]
+              fc=np.tile(edge,(len(m.faces),1))
+              fc[norm[:,axis]>.9]=rgba
+              m.visual=trimesh.visual.ColorVisuals(mesh=m,face_colors=fc)
+              m.apply_scale(.001)
+              sc.add_geometry(m,geom_name=name)
+            assert np.allclose(sc.extents,[1.4,.795,.8],atol=.001),sc.extents
+            outfile=f'NODO_MESA_COMEDOR_PORTICO_{color}_APROBADA_DXF.glb'
+            sc.export(outfile)
+            r=trimesh.load(outfile,force='scene')
+            assert len(r.geometry)==5 and np.allclose(r.extents,sc.extents,atol=.001)
+            print(outfile, r.extents, [len(x.faces) for x in r.geometry.values()])
+          PY
+      - name: Agregar GLBs al repositorio
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add NODO_MESA_COMEDOR_PORTICO_*_APROBADA_DXF.glb
+          git commit -m "NODO mesa comedor Pórtico aprobada: DXF original 18 mm"
+          git push
