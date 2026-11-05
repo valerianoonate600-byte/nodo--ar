@@ -1,0 +1,50 @@
+name: NODO diagnósticos de muestras de madera
+on:
+  push:
+    paths: ['.github/workflows/nodo-muestras-control.yml']
+permissions:
+  contents: read
+jobs:
+  textures:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Inspeccionar imágenes de materiales originales
+        run: |
+          python -m pip install pillow
+          python - <<'PY'
+          import struct,json,os,io
+          from PIL import Image,ImageDraw,ImageOps
+          os.makedirs('nodo_muestras',exist_ok=True)
+          files=['NODO_ARRIME_CRUZ_KIRI_V1.glb','NODO_ARRIME_CRUZ_PARAISO_V1.glb','NODO_ARRIME_CRUZ_CUARZO_V1.glb','NODO_RACK_PARAISO_V4.glb','NODO_RACK_KIRI_MDF_V2_AR.glb']
+          for fn in files:
+            raw=open(fn,'rb').read(); n=struct.unpack_from('<I',raw,12)[0]; js=json.loads(raw[20:20+n])
+            bv=js['bufferViews']; mats=js.get('materials',[]); tex=js.get('textures',[])
+            for mat in mats:
+              pbr=mat.get('pbrMetallicRoughness',{}); t=pbr.get('baseColorTexture',{}).get('index')
+              if t is None:continue
+              ii=tex[t]['source']; im=js['images'][ii]; view=bv[im['bufferView']]
+              off=(view.get('byteOffset',0)); size=view['byteLength']; base=20+n
+              aligned=(base+3)//4*4
+              # BIN chunk header 8 bytes following JSON chunk
+              binpos=aligned+8
+              try:
+                pic=Image.open(io.BytesIO(raw[binpos+off:binpos+off+size])).convert('RGB')
+              except Exception as e:
+                print("ERR",fn,mat.get('name'),e,'off',off,'size',size,'base',binpos); continue
+              name=fn.replace('.glb','')+'__'+(mat.get('name') or 'sin_nombre').replace(' ','_')
+              pic.save('nodo_muestras/'+name+'.jpg',quality=86)
+              w,h=pic.size; thumb=ImageOps.contain(pic,(500,350))
+              canvas=Image.new('RGB',(540,440),'#f2f0ed')
+              canvas.paste(thumb,((540-thumb.width)//2,20))
+              d=ImageDraw.Draw(canvas); d.text((10,390),name[:75],fill='#222'); d.text((10,412),f'{w}x{h} / {size} bytes',fill='#555')
+              canvas.save('nodo_muestras/preview_'+name+'.jpg')
+              print("MATERIAL",fn,mat.get('name'),'pngbytes',size,'dims',pic.size,'avg',pic.resize((1,1)).getpixel((0,0)))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nodo-muestras-faplac
+          path: nodo_muestras/
