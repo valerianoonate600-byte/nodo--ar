@@ -24,16 +24,18 @@ model-viewer{width:100%;height:70vh;min-height:520px;background:#fff;border-radi
 <h1>MESA RATONA ORGÁNICA · NODO</h1>
 
 <div class="controls">
-<button class="active" data-src="NODO_MESA_RATONA_ORGANICA_KIRI_V3.glb">KIRI</button>
-<button data-src="NODO_MESA_RATONA_ORGANICA_PARAISO_V3.glb">PARAÍSO</button>
-<button data-src="NODO_MESA_RATONA_ORGANICA_CUARZO_V3.glb">CUARZO</button>
+<button class="active" data-src="NODO_RATONA_CRUZ_KIRI_V1.glb?v=correcta-1">KIRI</button>
+<button data-src="NODO_RATONA_CRUZ_PARAISO_V1.glb">PARAÍSO</button>
+<button data-src="NODO_RATONA_CRUZ_CUARZO_V1.glb">CUARZO</button>
 </div>
 
 <button class="ar" id="arBtn">PROBALO EN TU CASA</button>
 <div class="note">Elegí el color, girá la mesa y probala en tu casa desde el celular.</div>
 
 <model-viewer id="viewer"
-src="NODO_MESA_RATONA_ORGANICA_KIRI_V3.glb"
+camera-orbit="38deg 65deg 1.5m"
+camera-target="0m 0.24m 0m"
+src="NODO_RATONA_CRUZ_KIRI_V1.glb"
 camera-controls
 touch-action="pan-y"
 shadow-intensity="1"
@@ -56,7 +58,7 @@ buttons.forEach(button => {
     buttons.forEach(b => b.classList.remove('active'));
     button.classList.add('active');
     const src = button.dataset.src;
-    viewer.setAttribute('src', src + '?v=3-' + Date.now());
+    viewer.setAttribute('src', src + '?v=cruz-correcta-' + Date.now());
   });
 });
 
