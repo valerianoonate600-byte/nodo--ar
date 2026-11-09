@@ -31,20 +31,12 @@ model-viewer{width:100%;height:70vh;min-height:520px;background:#fff;border-radi
 
 <button class="ar" id="arBtn">PROBALO EN TU CASA</button>
 <div class="note">Elegí el color, girá la mesa y probala en tu casa desde el celular.</div>
-  <div style="text-align:center; margin:24px auto;">
-  <p style="font-size:14px; font-weight:bold;">
-    ESCANEÁ Y PROBALO EN TU CASA
-  </p>
-  <img
-    src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&amp;data=https%3A%2F%2Fproba.nodomuebles.com.ar%2Fmesa-ratona-organica.html"
-    alt="QR para probar la mesa ratona Orgánica"
-    width="180"
-    height="180"
-    style="display:block; margin:10px auto;"
-  >
-</div>
+ <div style="display:flex; align-items:center; gap:20px;">
+  <div style="flex:1; min-width:0;">
 
 <model-viewer id="viewer"
+  </div>
+<div style="width:200px; flex-shrink:0; text-align:center;">
 camera-orbit="38deg 65deg 1.5m"
 camera-target="0m 0.24m 0m"
 src="NODO_RATONA_CRUZ_KIRI_V1.glb"
@@ -59,6 +51,19 @@ ar-placement="floor"
 ar-scale="fixed"
 environment-image="neutral">
 </model-viewer>
+</div>
+<div style="width:200px; flex-shrink:0; text-align:center;">
+  <p style="font-size:14px; font-weight:bold;">
+    ESCANEÁ Y PROBALO EN TU CASA
+  </p>
+  <img
+    src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&amp;data=https%3A%2F%2Fproba.nodomuebles.com.ar%2Fmesa-ratona-organica.html"
+    alt="QR Mesa Ratona Orgánica"
+    width="180"
+    height="180"
+    style="display:block; margin:10px auto;"
+  >
+</div>
 </div>
 
 <script>
