@@ -15,9 +15,17 @@
     .controls button.active{background:#111;color:#fff}
     .ar{display:block;margin:0 auto 12px;background:#111;color:#fff;font-size:16px}
     .note{text-align:center;font-size:13px;color:#666;margin:0 0 12px}
+    .viewer-layout{display:flex;gap:24px;align-items:center}
+    .viewer-layout model-viewer{flex:1;min-width:0}
+    .qr-side{width:200px;flex:0 0 200px;text-align:center}
+    .qr-side p{font-size:14px;font-weight:bold;margin:0 0 12px}
+    .qr-side img{display:block;width:180px;height:180px;margin:auto}
     model-viewer{width:100%;height:70vh;min-height:520px;background:#fff;border-radius:18px}
     @media(max-width:700px){
       .wrap{padding:8px}
+      .viewer-layout{flex-direction:column}
+      .viewer-layout model-viewer{width:100%;height:72vh;min-height:480px;flex:auto}
+      .qr-side{width:100%;flex:auto}
       model-viewer{height:72vh;min-height:480px}
       h1{font-size:16px}
     }
@@ -36,6 +44,7 @@
     <button class="ar" id="arBtn">PROBALO EN TU CASA</button>
     <div class="note">Elegí el color, girá la banqueta y probala en tu casa desde el celular.</div>
 
+    <div class="viewer-layout">
     <model-viewer id="viewer"
       src="NODO_BANQUETA_CRUZ_KIRI_V3_MAESTRO_CORREGIDO.glb"
       alt="Banqueta Cruz NODO"
@@ -50,6 +59,11 @@
       ar-scale="fixed"
       environment-image="neutral">
     </model-viewer>
+      <div class="qr-side">
+        <p>ESCANEÁ Y PROBALO EN TU CASA</p>
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&amp;data=https%3A%2F%2Fproba.nodomuebles.com.ar%2Fbanqueta-cruz.html" alt="QR Banqueta Cruz NODO" width="180" height="180">
+      </div>
+    </div>
   </div>
 
   <script>
