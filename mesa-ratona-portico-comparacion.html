@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NODO · Ratona Pórtico · comparación de estructura</title>
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f1ec;color:#171717}
+header{padding:18px 16px;text-align:center}h1{font-size:19px;letter-spacing:.08em;margin:0 0 8px}
+p{font-size:13px;line-height:1.45;margin:6px auto;max-width:780px}
+.warn{font-weight:bold;color:#763a1f}.colors{display:flex;justify-content:center;gap:10px;margin:15px 0}
+.colors button{padding:10px 18px;border:1px solid #111;border-radius:30px;background:white;cursor:pointer;font-weight:bold}
+.colors button.active{background:#111;color:white}
+model-viewer{display:block;width:min(95vw,1000px);height:66vh;min-height:420px;margin:auto;background:white;border-radius:18px}
+footer{text-align:center;padding:12px;font-size:12px;color:#555}
+</style></head><body>
+<header><h1>NODO · MESA RATONA PÓRTICO</h1>
+<p class="warn">PROTOTIPO DE COMPARACIÓN · NO ES EL MODELO FINAL NI UN PLANO DE FABRICACIÓN</p>
+<p>Se muestra la geometría de la mesa de comedor Pórtico con proporciones aproximadas de una ratona. Sirve únicamente para comparar el lenguaje de las patas y sus aberturas. Los encastres y medidas de cada pieza deben reconstruirse desde el DXF original.</p>
+<div class="colors">
+<button class="active" data-file="NODO_MESA_COMEDOR_PORTICO_KIRI_UV_LIMPIO_V2.glb">KIRI</button>
+<button data-file="NODO_MESA_COMEDOR_PORTICO_PARAISO_UV_LIMPIO_V2.glb">PARAÍSO</button>
+<button data-file="NODO_MESA_COMEDOR_PORTICO_CUARZO_UV_LIMPIO_V2.glb">CUARZO</button>
+</div></header>
+<model-viewer id="m" src="NODO_MESA_COMEDOR_PORTICO_KIRI_UV_LIMPIO_V2.glb" scale="0.857 0.548 0.75" camera-controls auto-rotate-delay="1000000" interaction-prompt="none" shadow-intensity="1" exposure="1" environment-image="neutral" alt="Comparación proporcional de mesa ratona Pórtico, no definitiva"></model-viewer>
+<footer>Referencia conceptual: ancho 120 cm, profundidad 60 cm, altura cercana a 43,6 cm. Sin realidad aumentada ni QR para evitar confundir este prototipo con un producto aprobado.</footer>
+<script>const m=document.getElementById('m');document.querySelectorAll('[data-file]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-file]').forEach(x=>x.classList.remove('active'));b.classList.add('active');m.src=b.dataset.file;});</script>
+</body></html>
