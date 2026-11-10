@@ -11,6 +11,7 @@ p{font-size:13px;line-height:1.45;margin:6px auto;max-width:780px}
 .colors button.active{background:#111;color:white}
 model-viewer{display:block;width:min(95vw,1000px);height:66vh;min-height:420px;margin:auto;background:white;border-radius:18px}
 footer{text-align:center;padding:12px;font-size:12px;color:#555}
+.viewer-layout{display:flex;gap:20px;align-items:center;max-width:1200px;margin:auto;padding:0 12px}.viewer-layout model-viewer{flex:1;min-width:0;width:100%;margin:0}.qr-side{flex:0 0 200px;width:200px;text-align:center}.qr-side p{font-size:13px;font-weight:700;margin:0 0 12px}.qr-side img{display:block;width:180px;height:180px;margin:auto}@media(max-width:750px){.viewer-layout{flex-direction:column}.viewer-layout model-viewer{width:100%;flex:auto}.qr-side{flex:auto;width:100%}}
 </style></head><body>
 <header><h1>NODO · MESA RATONA PÓRTICO</h1>
 <p class="warn">PROTOTIPO DE COMPARACIÓN · NO ES EL MODELO FINAL NI UN PLANO DE FABRICACIÓN</p>
@@ -20,7 +21,7 @@ footer{text-align:center;padding:12px;font-size:12px;color:#555}
 <button data-file="NODO_MESA_COMEDOR_PORTICO_PARAISO_UV_LIMPIO_V2.glb">PARAÍSO</button>
 <button data-file="NODO_MESA_COMEDOR_PORTICO_CUARZO_UV_LIMPIO_V2.glb">CUARZO</button>
 </div></header>
-<model-viewer id="m" src="NODO_MESA_COMEDOR_PORTICO_KIRI_UV_LIMPIO_V2.glb" scale="0.857 0.548 0.75" camera-controls auto-rotate-delay="1000000" interaction-prompt="none" shadow-intensity="1" exposure="1" environment-image="neutral" alt="Comparación proporcional de mesa ratona Pórtico, no definitiva"></model-viewer>
+<div class="viewer-layout"><model-viewer id="m" src="NODO_MESA_COMEDOR_PORTICO_KIRI_UV_LIMPIO_V2.glb" scale="0.857 0.548 0.75" camera-controls auto-rotate-delay="1000000" interaction-prompt="none" shadow-intensity="1" exposure="1" environment-image="neutral" alt="Comparación proporcional de mesa ratona Pórtico, no definitiva"></model-viewer><aside class="qr-side"><p>ESCANEÁ Y ABRILO EN TU CELULAR</p><img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&amp;data=https%3A%2F%2Fproba.nodomuebles.com.ar%2Fmesa-ratona-portico-comparacion.html" alt="Código QR para abrir la comparación de la mesa ratona Pórtico"></aside></div>
 <footer>Referencia conceptual: ancho 120 cm, profundidad 60 cm, altura cercana a 43,6 cm. Sin realidad aumentada ni QR para evitar confundir este prototipo con un producto aprobado.</footer>
 <script>const m=document.getElementById('m');document.querySelectorAll('[data-file]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-file]').forEach(x=>x.classList.remove('active'));b.classList.add('active');m.src=b.dataset.file;});</script>
 </body></html>
